@@ -5,6 +5,8 @@ output:
   
 ---
 
+"'{r load_packages, warning=FALSE, message=FALSE}"
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -148,8 +150,9 @@ ggplot(data=mpg)+
 geom_boxplot(mapping=aes(group=class, x=hwy, y=cty))
 ```
 ```{r}
-ggplot(data=mpg)+
-  geom_histogram(mapping=aes(binwidth=5, x=cyl, y=cty))
+
+ggplot(aes(x=cyl), data=mpg) +
+    geom_histogram()
 ```
 ```{r}
 ggplot(data=mpg)+
