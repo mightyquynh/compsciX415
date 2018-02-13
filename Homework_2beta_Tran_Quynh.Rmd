@@ -2,7 +2,7 @@
 title: "Homework_2_Quynh_Tran"
 output:
   html_document: default
-  pdf_document: default
+  
 ---
 
 ```{r setup, include=FALSE}
@@ -108,7 +108,7 @@ ggplot(data = mpg) +
 ```{r}
 library(ggplot2)
 ggplot(data = mpg) + 
-  geom_point(mapping = aes(color = displ<5))
+  geom_point(mapping = aes(x=trans, y=cty, color = displ<5))
 ```
 ###Sect 3.3.1 6) Nothing happens if you only have aesthetic characteristic without a variable. You need to have variables for X and Y for a plot.
 
@@ -129,11 +129,12 @@ ggplot(data=mpg)+
   geom_point(mapping=aes(x=displ, y=hwy))+
   facet_wrap(~class,ncol=10)
 
+ggplot(data=mpg)+
   geom_point(mapping=aes(x=displ, y=hwy))+
   facet_grid(~class)
 ```
 
-###Sect 3.5.1 5) nrow defines the number of rows for X; ncol defines the number of columns for X.  You can control the order in which the panels appear. You can have the scales vary with each panel. Facet_grid gives matrix of panels defined by row and column facetting variables already. You use it when you have two discrete variables, and all combinations of the variables already exist in the data.
+###Sect 3.5.1 5) nrow defines the number of rows for X; ncol defines the number of columns for X.  You can control the order in which the panels appear. You can have the scales vary with each panel. Facet_grid () gives matrix of panels defined by row and column facetting variables already. You use it when you have two discrete variables, and all combinations of the variables already exist in the data.
 
 
 
@@ -192,13 +193,38 @@ ggplot()+
 ###Sect 3.6.1 5) Plots are not different because the code is the same.The first set of code is more efficient.
 ```{r}
 ggplot(data=mpg) +
-  geom_col (mapping=aes (x=class, y=trans))
+  geom_col (mapping=aes (x=class, y=cty))
 
 ggplot(data = mpg) +
-  geom_bar(mapping = aes(x =class , y = trans), stat="identity")
+  geom_bar(mapping = aes(x =class, y=cty), stat="identity")
 
 ```
-
 ```{r}
+ggplot(data=mpg,mapping=aes(x=displ, y=hwy))+
+  geom_point()+
+  geom_smooth(se=FALSE)
 
+ggplot(data=mpg,mapping=aes(x=displ, y=hwy, group=drv))+
+  geom_point()+
+  geom_smooth(se=FALSE)
+  show.legend=FALSE
+  
+  ggplot(data=mpg,mapping=aes(x=displ, y=hwy, color=drv))+
+  geom_point()+
+  geom_smooth(se=FALSE)
+
+  ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(mapping = aes(color = drv)) + 
+  geom_smooth(se=FALSE)
+
+  
+  ggplot(data=mpg,mapping=aes(x=displ, y=hwy, linetype=drv, color=drv))+
+  geom_point()+
+  geom_smooth(se=FALSE)
+ 
+  
 ```
+###Sect 3.6.1 6) Extra credit plots as shown above.
+
+###Sect 3.7.1 2) Geom_col() does not differ from geom_bar() in terms of the output here as coded. Geom_bar() makes the height of the bar proportional to the number of cases in each group. Use geom_col() if you want the heights of the bars to represent values in the data. Geom_bar() uses stat_count by default: it counts the number of cases at each x position. Geom_col() uses stat_identity: it leaves the data as is.
+
