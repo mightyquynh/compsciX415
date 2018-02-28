@@ -1,0 +1,208 @@
+---
+title: "COMPSCIX 415.2 Homework 4"
+author: "Quynh Tran"
+date: "2/20/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+"'{r load_packages, warning=FALSE, message=FALSE}"
+
+
+```
+```{r}
+library(tidyverse)
+library(nycflights13)
+data("flights")
+file_path <- '~/compscix-415-2-assignments/flights.csv'
+csv_data <- read_csv(file = file_path)
+flight_data <- read_csv(file = file_path)
+
+file_path <- '~/compscix-415-2-assignments/baby_names.txt'
+baby_data <- read_delim(delim = '|', file = file_path)
+
+```
+
+
+
+
+```{r}
+glimpse (flight_data)
+glimpse (csv_data)
+```
+
+## remove cancelled flights, then mean dep_delay of not cancelled flights
+
+```{r}
+not_cancelled <- flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+
+not_cancelled %>% 
+  group_by(year, month, day) %>% 
+  summarise(mean = mean(dep_delay))
+
+```
+## Sect. 5.6.7 2) redo without using count() to give the number of flights by destination and the distance of flights by tailnum.
+
+
+```{r}
+
+not_cancelled %>% count(dest) 
+not_cancelled %>% count(tailnum, wt = distance) 
+
+not_cancelled %>% 
+  group_by(dest) %>%
+summarise(dest_freq = n()) 
+
+not_cancelled %>% 
+  group_by(tailnum) %>% 
+  summarise(distance_trav= sum(distance)) 
+```
+### Sect. 5.6.7 4) Look at cancelled flights per day. Is there a pattern? Is cancelled flights related to average delay? If just looking at table of cancelled flights per day, I cannot see any pattern. However, plotting average # of delays per day with average # of cancelled flights show a positive relationship. The more # delays the more likely there are cancelled flights.
+
+
+```{r}
+cancelled <- flights %>% 
+  filter(is.na(dep_delay) | is.na(arr_delay)) %>%
+group_by(year, month, day) %>%
+summarise(count = n())
+
+cancelled
+```
+
+```{r}
+flights %>%
+  group_by(day) %>%
+  
+  summarise(cancelled = mean(is.na(dep_delay)),
+            mean_dep = mean(dep_delay, na.rm = T),
+            mean_arr = mean(arr_delay, na.rm = T)) %>%
+  ggplot(aes(y = cancelled)) +
+  geom_point(aes(x = mean_dep), colour = "red") +
+  geom_point(aes(x = mean_arr), colour = "blue") +
+  
+  labs(x = "Avg delay per day", y = "Cancelled flights p day")
+```
+
+
+###Sect. 5.6.7 5) Which carrier has worst delays? Carrier F9, which is Frontiers Airlines.
+
+```{r}
+flights %>% 
+  group_by(carrier, dest) %>%
+summarise (n())
+
+```
+
+```{r}
+flights %>%
+  group_by(carrier) %>% 
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+ arrange(desc(arr_delay))
+
+```
+
+
+###Sect. 5.6.7 6) If argument sort of function count is set to TRUE, count(sort=TRUE), then it output will sort in descending order of n. 
+
+
+
+###Sect 10.5 1) You can tell the data is a data frame or tibble by printing it or determining its class. mtcars data printed data.frame at the top of the data. When you determine which class of data it is, it also returns data.frame. When you View() a dataset, you can tell it's a tibble because all the columns fit onto the screen and only the first 10 rows of data are shown. In this class, it printed more.
+
+
+```{r}
+mtcars
+class(mtcars)
+glimpse(mtcars)
+
+```
+
+###Sect. 10.5 2) The results are different between using data.frame () and an equivalent tibble. When using $ in a data.frame, it completes any missing letters in the variable name so df$x means df$xyz. Tibbles are more strict and won't do partial matching in a variable name. This could be a problem if you mean something else like df$xly.  With data frames, [ sometimes returns a data frame, and sometimes returns a vector. With tibbles, [ always returns another tibble.
+
+```{r}
+
+  
+  df <- data.frame(abc = 1, xyz = "a")
+df$x
+df[, "xyz"]
+df[, c("abc", "xyz")]
+
+tbl <- as_tibble(df)
+tbl$x
+tbl[, "xyz"]
+tbl[, c("abc", "xyz")]
+```
+
+
+
+###Sect. 10.5 3) var <- "mpg", how can you extract the reference variable from a tibble. You can use the double bracket, like df[[var]]. You cannot use $ dollar sign, because df$var would look for a column named var.
+
+###Sect. 10.5 6) What option controls how many additional column names are printed at the footer of a tibble? To print tibbles is print.tbl_df. Use option n_extra to determine the extra number of columns to print.
+
+###Sect. 12.3.3 2) The code failed because 1999, 2000, are column names. It did not have ' ' around the names. Without it, the code is reading te 1999th and 2000th column of data.
+
+
+```{r}
+table4a %>% 
+  gather('1999', '2000', key = "year", value = "cases")
+```
+
+
+###Sect. 12.3.3 3) Phillip Woods has 2 different ages. This probably means that there are 2 different Phillip Woods, one is age 45 and one is age 50, but no way to know which one is 186 in height. Spreading the tibble put Phillip Woods data on three lines and Jessica Cordero on 2 lines. It would be best to tidy the data with the variables name, age, and height. An additional column to differentiate the second Phillip Woods would solve this problem, such as a variable called 'observation.' 
+
+
+###Sect. 12.3.3 4) Tidy this data. Spread or gather? You need to gather it because the variable values are spread across multiple columns. The variables should be pregnant, gender, and age or count. I'm not sure what the variable for the count really is. You would gather it if the variable data is spread across multiple rows. The data may be problematic though because male do not get pregnant, unless this question is asking if the male has gotten someone else pregnant.
+
+```{r}
+preg <- tribble(
+  ~pregnant, ~male, ~female,
+  "yes",     NA,    10,
+  "no",      20,    12
+)
+
+preg %>%
+  gather('male',"female", key="gender", value= "age")
+
+
+```
+
+
+
+###Sect. 12.4.3  1) The separate () function filled missing values with NA and dropped extra values if there were more than expected. The extra can control when there are more values. extra="warn" is the default: emit a warning and drop extra values. extra="drop": drop any extra values without a warning. extra="merge": only splits at most length(into) times. If there's not enough values, fill controls what happens. fill="warn" is the default: emit a warning and fill from the right. fill="right": fill with missing values on the right. fill="left": fill with missing values on the left.
+
+
+```{r}
+tibble(x = c("a,b,c", "d,e,f,g", "h,i,j")) %>% 
+  separate(x, c("one", "two", "three"))
+
+tibble(x = c("a,b,c", "d,e", "f,g,i")) %>% 
+  separate(x, c("one", "two", "three"))
+```
+
+
+
+###Sect. 12.4.3 2) Separate() and unite() has remove argument which when set to TRUE, it will remove input column from output data frame. You want to set it to FALSE if you don't want to remove the input column from the output data frame.
+
+
+```{r}
+library(tidyverse)
+file_path <- '~/compscix-415-2-assignments/baby_names.txt'
+baby_data <- read_delim(delim = '|', file = file_path)
+
+glimpse(baby_data)
+```
+```{r}
+saveRDS(baby_data, file = "~/compscix-415-2-assignments/baby_names.rds")
+
+baby_names <- readRDS(file ='~/compscix-415-2-assignments/baby_names.rds')
+
+glimpse(baby_names)
+```
+
+
+
+
+
