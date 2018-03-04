@@ -1,0 +1,385 @@
+---
+title: "COMPSCIX 415.2 Homework 5/Midterm"
+author: "Quynh Tran"
+date: "February 27, 2018"
+output: 
+  html_document: 
+    toc: yes
+    toc_depth: 2
+---
+# https://github.com/mightyquynh/compscix-415-2-assignments
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+#The tidyverse packages (3 points)
+
+
+```{r}
+library(tidyverse)
+sessionInfo()
+
+```
+
+##1) Can you name which package is associated with each task below? 
+###Plotting: ggplot2
+###Data munging/wrangling - dplyr
+###Reshaping (speading and gathering) data - dplyr
+###Importing/exporting data - readr
+
+## 2) Now can you name two functions that you’ve used from each package that you listed above for these tasks?
+###Plotting - geom_boxplot() geom_line()
+###Data munging/wrangling - filter() select()
+###Reshaping data - spread() gather()
+###Importing/exporting data (note that readRDS and saveRDS are base R functions) - read_delim() write_csvc()
+
+
+#R Basics (1.5 points)
+## 1) Fix this code with the fewest number of changes possible so it works. My_data.name___is.too0ooLong! <- c( 1 , 2   , 3 ) Just removing ! will make it work, although the data name is very bad:
+
+
+```{r}
+
+
+My_data.name___is.too0ooLong <- c( 1 , 2   , 3 )
+
+My_data.name___is.too0ooLong
+
+```
+
+## 2) Fix this code so it works. c has to be small cap, and 'it' was missing a closing '.
+
+```{r}
+y_string <- c('has', 'an', 'error', 'in', 'it')
+
+y_string
+
+```
+
+## 3) Look at the code below and comment on what happened to the values in the vector. A vector must have elements of the same type. While 1, 2, 5 were entered as numerics, and '3' and '4' as characters, it made all of them characters. 
+
+```{r}
+my_vector <- c(1, 2, '3', '4', 5)
+my_vector
+
+typeof(my_vector)
+```
+
+
+
+#Data import/export 
+
+```{r}
+
+file_path <- '~/compscix-415-2-assignments/rail_trail.txt'
+rail_trail <- read_delim(delim = '|', file = file_path)
+
+glimpse(rail_trail)
+```
+
+
+```{r}
+saveRDS(rail_trail, file = "~/compscix-415-2-assignments/rail_trail.rds")
+
+rail_trail<- readRDS(file ='~/compscix-415-2-assignments/rail_trail.rds')
+
+glimpse(rail_trail)
+```
+
+
+# Visualization
+##1) The Mrs. President pie charts would be better as bar charts. Whole colored pies represent 100% but the yes/no values are separated as separate pies, rather than parts of the pie to represent 100%. Even if the yes/no values were represented within one pie, one problem is that the yes/no sum don't total 100%, so it would be misleading still. It should also be 2 separate graphics, age is a different variable from gender. Even though the gender pie is a different color that the age pies, it's lined up as a group.
+
+ 
+```{r}
+
+library(forcats)
+president <- tribble(
+  ~age,     ~Agree, ~value, 
+  "under45",  "yes",  79, 
+   "under45", "no",   16,
+  "b45-64",   "yes", 69, 
+  "b45-64",  "no",   22,
+  "65over", "yes", 44,
+  "65over", "no", 39,
+)
+
+president2 <-tribble(
+  ~gender, ~Agree, ~value,
+  "Men", "yes", 65,
+  "Men",  "no", 25,
+  "Women", "yes",72,
+  "Women", "no", 20,
+)
+president <- president %>% mutate(age = fct_relevel(age, 'under45', 'b45-64', '65over'))
+president
+
+
+ggplot(data=president)+
+  geom_bar(mapping=aes(x=age, y=value, fill=Agree), position="dodge", stat="identity") + 
+labs(x="Age group", y="Percentage", title="% respondents who agree a woman will be president in their lifetime")
+
+ggplot(data=president2)+
+  geom_bar(mapping=aes(x=gender, y=value, fill=Agree), position="dodge", stat="identity") + 
+labs(x="gender", y="Percentage", title="% respondents who agree a woman will be president in their lifetime")
+
+```
+
+
+
+counts <- table(mtcars$vs, mtcars$gear)
+barplot(counts, main="Car Distribution by Gears and VS",
+  xlab="Number of Gears", col=c("darkblue","red"),
+ 	legend = rownames(counts), beside=TRUE)
+
+
+
+
+
+## 2) Reproduce diamonds graphics
+
+## 3) Make one change on the code and make graphics more useful. More useful would be to sort by the median of diamond cut.
+
+```{r}
+library(tidyverse)
+
+ggplot(data = diamonds, mapping = aes(x = cut, y = carat, fill=color))+
+  geom_boxplot(position='identity')+ 
+  coord_flip() +
+  xlab("CUT OF DIAMOND")+
+  ylab("CARAT OF DIAMOND")
+
+ggplot(data = diamonds, mapping = aes(x = reorder(cut, carat, FUN=median), y = carat, fill=color))+
+  geom_boxplot(position='identity')+ 
+  coord_flip() +
+  xlab("CUT OF DIAMOND")+
+  ylab("CARAT OF DIAMOND") 
+  
+
+ggplot(data = diamonds)+
+  geom_bar(aes(x=cut,y=price),stat = "summary",fun.y="mean",alpha=1,fill="blue")+
+  xlab("Cut Type")+
+  ylab("Average Price")+
+  ggtitle("Cut vs Price")
+
+
+```
+
+# Data munging and wrangling 
+## 1) Tidy table2, by spreading, it pulled the "type" of cases and populations into new variable.
+
+```{r}
+table2
+
+table2 %>%
+spread(key=type, value=count)
+```
+
+## 2) diamonds with price per carat
+
+```{r}
+library(dplyr)
+
+mutate(diamonds, price_per_carat = price/carat)
+
+diamonds
+
+```
+
+## 3) Number of diamonds price > 1000 and carat < 1.5 by cut.
+
+```{r}
+diamonds %>%
+filter(diamonds, price > 1000 , carat < 1.5) %>%
+  group_by (cut) %>%
+  summarise 
+
+count(n())
+   
+
+```
+# What proportion of diamonds price > 1000 and carat < 1.5 by cut
+
+```{r}
+diamonds_new%>%
+filter(diamonds, price > 1000 & carat < 1.5) %>%
+  group_by (cut) %>%
+ggplot(data = diamonds) +
+  geom_bar(mapping = aes(x = cut, y = ..count../sum(..count..)))
+```
+
+   
+diamonds %>% 
+  group_by(cut) %>% 
+  summarise(prop_cut = mean(price > 1000 , carat < 1.5))
+  
+  
+diam_cut <-filter(diamonds, price > 1000 , carat < 1.5) %>%
+   count(n())
+  
+  
+  
+  diam_cut <-filter(diamonds, price > 1000 , carat < 1.5) %>%
+   count(n())
+   
+diam_cut
+summarise(diam_cut, delay = mean(, na.rm = TRUE))
+
+diam_cut <- select (diamonds, price > 1000 , carat < 1.5) %>%
+   group_by(diam_cut,cut)
+diam_cut <- filter(data=diamonds, price > 1000, cut )
+diamonds %>%
+  filter (diamonds_new)
+  
+
+group_by(cut)
+summarise(proportion = mean(dep_delay, na.rm = TRUE))
+
+
+library(nycflights13)
+
+flights_sml <- select(flights, 
+  year:day, 
+  ends_with("delay"), 
+  distance, 
+  air_time
+)
+mutate(flights_sml,
+  gain = arr_delay - dep_delay,
+  speed = distance / air_time * 60
+)
+
+
+
+# EDA txhousing data
+
+## 1) During what time period is this data from? 2000-2015
+
+```{r}
+library(ggplot2)
+library (dplyr)
+View(txhousing)
+
+
+```
+
+
+## 2) How many cities are represented? 46 cities
+
+```{r}
+txhousing %>% 
+  group_by(city) %>% 
+  summarise(
+    count = n())
+
+```
+
+
+## 3) Which city, month and year had the highest number of sales? Houston, July 2015 had 8945 sales.
+
+```{r}
+
+txhousing %>% 
+  group_by(city, month, year) %>% 
+  summarise(sales = mean(sales, na.rm = TRUE)) %>%
+ arrange(desc(sales))
+```
+
+## 4) What kind of relationship do you think exists between the number of listings and the number of sales? There is a positive relationship between listings and sales. This relationship holds true for the 15-year period.
+
+```{r}
+ggplot(data = txhousing) + 
+  geom_point(mapping = aes(x = listings, y = sales)) +
+  geom_smooth(mapping = aes(x = listings, y = sales))
+
+
+ggplot(data = txhousing) + 
+  geom_point(mapping = aes(x = listings, y = sales)) +
+facet_wrap(~ year, nrow = 3)
+
+ggplot(data = txhousing) + 
+  geom_point(mapping = aes(x = listings, y = sales)) +
+facet_wrap(~ city)
+
+
+```
+
+Check your assumption and show your work.
+## 5) What proportion of sales is missing for each city?
+
+```{r}
+sales_missing <- txhousing %>% 
+  filter(is.na(sales))
+
+sales_missing %>% group_by(city) %>% summarize(missing_count = n())
+
+sales_missing
+  mutate(cancelled = is.na(dep_delay) | is.na(arr_delay))
+```
+
+
+
+
+sales_missing <- txhousing %>% group_by(city) %>% summarize(sales_missing = sum(sales, na.rm = FALSE), prop_missing = mean(sales_missing), na.rm = FALSE)
+
+sales_missing <- txhousing %>% group_by(city) %>% summarize(sales_missing = sum(is.na, na.rm = FALSE), prop_missing = mean(sales_missing), na.rm = FALSE)
+
+```{r}
+library(dplyr)
+
+ggplot(data = txhousing) +
+  geom_bar(mapping = aes(x = city, y = ..count../sum(..count..)))
+ 
+```
+filter(data=txhousing(is.na(city))
+
+
+```
+
+## 6 Looking at only the cities and months with greater than 500 sales:
+
+```{r}
+filter(txhousing, sales > 500)
+```
+
+###• Are the distributions of the median sales price (column name median), when grouped by city, different? The same? Show your work.
+
+```{r}
+filter(txhousing, sales > 500) %>%
+  group_by_()
+```
+
+###• Any cities that stand out that you’d want to investigate further?
+###• Why might we want to filter out all cities and months with sales less than 500?
+
+
+flights %>%
+  group_by(carrier) %>% 
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
+ arrange(desc(arr_delay))
+
+min(data=txhousing,sales)
+
+
+  group_by(city, month, year) %>% 
+  summarise(
+    min
+    
+```
+flights %>% 
+  group_by(city) %>% 
+  summarise(
+    count = n(),
+    count_dist = n_distinct(arr_delay),
+    count_non_miss = sum(!is.na(arr_delay))
+  )
+
+txhousing %>% 
+  group_by(city, month, year) %>% 
+  summarise(
+    count = n(),
+    dist = mean(distance, na.rm = TRUE),
+    delay = mean(arr_delay, na.rm = TRUE)
+  min_rank(desc(data=txhousing, sales))
