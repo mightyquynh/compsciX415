@@ -128,19 +128,9 @@ labs(x="gender", y="Percentage", title="% respondents who agree a woman will be 
 ```
 
 
-
-counts <- table(mtcars$vs, mtcars$gear)
-barplot(counts, main="Car Distribution by Gears and VS",
-  xlab="Number of Gears", col=c("darkblue","red"),
- 	legend = rownames(counts), beside=TRUE)
-
-
-
-
-
 ## 2) Reproduce diamonds graphics
 
-## 3) Make one change on the code and make graphics more useful. More useful would be to sort by the median of diamond cut.
+## 3) Make one change on the code and make graphics more useful. More useful would be to sort by the median size of diamond carat by cut. With this graph, I can tell that the fair cut has the largest median size of diamonds. 
 
 ```{r}
 library(tidyverse)
@@ -157,12 +147,12 @@ ggplot(data = diamonds, mapping = aes(x = reorder(cut, carat, FUN=median), y = c
   xlab("CUT OF DIAMOND")+
   ylab("CARAT OF DIAMOND") 
   
+ggplot(data = diamonds, mapping = aes(x = reorder(cut, carat), y = carat, fill=color))+
+  geom_boxplot(position='identity')+ 
+  coord_flip() +
+  xlab("CUT OF DIAMOND")+
+  ylab("CARAT OF DIAMOND") 
 
-ggplot(data = diamonds)+
-  geom_bar(aes(x=cut,y=price),stat = "summary",fun.y="mean",alpha=1,fill="blue")+
-  xlab("Cut Type")+
-  ylab("Average Price")+
-  ggtitle("Cut vs Price")
 
 
 ```
@@ -178,78 +168,54 @@ spread(key=type, value=count)
 ```
 
 ## 2) diamonds with price per carat
+### mutate(diamonds, price_per_carat = price/carat)
+### diamonds
+
+
+## 3) Number of diamonds price > 1000 and carat < 1.5 by cut. Ideal	13044, Premium	8348, Very Good	7462, Good	3153, Fair	1174	
 
 ```{r}
 library(dplyr)
+library(tidyverse)
 
-mutate(diamonds, price_per_carat = price/carat)
+diamonds %>%
+  group_by (cut) %>%
+  count(cut, sort = TRUE)
 
-diamonds
+diamonds %>%
+filter(price > 1000 & carat < 1.5) %>%
+  group_by (cut) %>%
+  count(cut, sort = TRUE)
 
 ```
+### What proportion of diamonds price > 1000 and carat < 1.5 by cut? Ideal 0.6052619, Premium	0.6053223,	Very Good	0.6176130,	Good	0.6426824,	Fair	0.7291925. First I plot the distribution of diamonds by price and carat by cut to explore the distribution. Regardless of the cut, there's a positive relationship between price and carat. The plots are well distributed. Diamonds that are more than $1000 but smaller than 1.5 carat would fall in the left bottom of the plot, ones that are relatively expensive but relatively small. Compared to all the plotted diamonds, it seems improbable that such a large proportion of these diamonds are in the data set. Something is wrong with this data. 	
 
-## 3) Number of diamonds price > 1000 and carat < 1.5 by cut.
 
 ```{r}
-diamonds %>%
-filter(diamonds, price > 1000 , carat < 1.5) %>%
-  group_by (cut) %>%
-  summarise 
 
-count(n())
-   
+ggplot(data = diamonds) + 
+  geom_point(mapping = aes(x = carat, y = price)) +
+facet_wrap(~ cut)
+
+
+prop_diamonds <- tribble(
+  ~cut, ~total, ~subtotal,
+
+"Ideal",21551	,	13044,			
+"Premium",13791	,	8348,			
+"Very Good",12082	,	7462,			
+"Good",	4906	,3153,			
+"Fair", 1610,	1174,	
+)
+
+prop_diamonds
+
+mutate(prop_diamonds, proportion = subtotal/total)
+
 
 ```
-# What proportion of diamonds price > 1000 and carat < 1.5 by cut
-
-```{r}
-diamonds_new%>%
-filter(diamonds, price > 1000 & carat < 1.5) %>%
-  group_by (cut) %>%
-ggplot(data = diamonds) +
-  geom_bar(mapping = aes(x = cut, y = ..count../sum(..count..)))
-```
-
-   
-diamonds %>% 
-  group_by(cut) %>% 
-  summarise(prop_cut = mean(price > 1000 , carat < 1.5))
-  
-  
-diam_cut <-filter(diamonds, price > 1000 , carat < 1.5) %>%
-   count(n())
-  
-  
-  
-  diam_cut <-filter(diamonds, price > 1000 , carat < 1.5) %>%
-   count(n())
-   
-diam_cut
-summarise(diam_cut, delay = mean(, na.rm = TRUE))
-
-diam_cut <- select (diamonds, price > 1000 , carat < 1.5) %>%
-   group_by(diam_cut,cut)
-diam_cut <- filter(data=diamonds, price > 1000, cut )
-diamonds %>%
-  filter (diamonds_new)
-  
-
-group_by(cut)
-summarise(proportion = mean(dep_delay, na.rm = TRUE))
 
 
-library(nycflights13)
-
-flights_sml <- select(flights, 
-  year:day, 
-  ends_with("delay"), 
-  distance, 
-  air_time
-)
-mutate(flights_sml,
-  gain = arr_delay - dep_delay,
-  speed = distance / air_time * 60
-)
 
 
 
@@ -258,10 +224,7 @@ mutate(flights_sml,
 ## 1) During what time period is this data from? 2000-2015
 
 ```{r}
-library(ggplot2)
-library (dplyr)
-View(txhousing)
-
+glimpse(txhousing)
 
 ```
 
@@ -274,6 +237,8 @@ txhousing %>%
   summarise(
     count = n())
 
+txhousing %>% 
+  count(city)
 ```
 
 
@@ -287,13 +252,20 @@ txhousing %>%
  arrange(desc(sales))
 ```
 
-## 4) What kind of relationship do you think exists between the number of listings and the number of sales? There is a positive relationship between listings and sales. This relationship holds true for the 15-year period.
+## 4) What kind of relationship do you think exists between the number of listings and the number of sales? There is a positive relationship between listings and sales. The relationship holds true even when you remove or don't remove missing variables. This relationship holds true for the 15-year period. The relationship is not clear when looking at different cities though.
 
 ```{r}
 ggplot(data = txhousing) + 
   geom_point(mapping = aes(x = listings, y = sales)) +
   geom_smooth(mapping = aes(x = listings, y = sales))
 
+ggplot(data = txhousing) + 
+  geom_point(mapping = aes(x = listings, y = sales), na.rm=FALSE) +
+  geom_smooth(mapping = aes(x = listings, y = sales), na.rm=FALSE)
+
+ggplot(data = txhousing) + 
+  geom_point(mapping = aes(x = listings, y = sales), na.rm=TRUE) +
+  geom_smooth(mapping = aes(x = listings, y = sales), na.rm=TRUE)
 
 ggplot(data = txhousing) + 
   geom_point(mapping = aes(x = listings, y = sales)) +
@@ -313,73 +285,123 @@ Check your assumption and show your work.
 sales_missing <- txhousing %>% 
   filter(is.na(sales))
 
+txhousing%>% group_by(city) %>% summarize(sales_city = n())
+
 sales_missing %>% group_by(city) %>% summarize(missing_count = n())
-
-sales_missing
-  mutate(cancelled = is.na(dep_delay) | is.na(arr_delay))
 ```
 
 
 
-
-sales_missing <- txhousing %>% group_by(city) %>% summarize(sales_missing = sum(sales, na.rm = FALSE), prop_missing = mean(sales_missing), na.rm = FALSE)
-
-sales_missing <- txhousing %>% group_by(city) %>% summarize(sales_missing = sum(is.na, na.rm = FALSE), prop_missing = mean(sales_missing), na.rm = FALSE)
-
-```{r}
-library(dplyr)
-
-ggplot(data = txhousing) +
-  geom_bar(mapping = aes(x = city, y = ..count../sum(..count..)))
- 
-```
-filter(data=txhousing(is.na(city))
-
-
-```
 
 ## 6 Looking at only the cities and months with greater than 500 sales:
 
 ```{r}
-filter(txhousing, sales > 500)
+sales_m500 <- txhousing %>% 
+  filter(sales > 500)
 ```
 
-###• Are the distributions of the median sales price (column name median), when grouped by city, different? The same? Show your work.
+###• Are the distributions of the median sales price (column name median), when grouped by city, different? The same? Show your work. Compare the distribution of median between cities, don't need sales in the plot. Yes, the ditributions differ between cities. A city like Corpus Cristi has a much narrower distribution of median sales.  
 
 ```{r}
-filter(txhousing, sales > 500) %>%
-  group_by_()
+sales_m500 <- txhousing %>% 
+  filter(sales > 500)
+
+ggplot(data = sales_m500) + 
+  geom_boxplot(mapping = aes(x = median, y=city), position="identity")
+
 ```
 
-###• Any cities that stand out that you’d want to investigate further?
-###• Why might we want to filter out all cities and months with sales less than 500?
 
-
-flights %>%
-  group_by(carrier) %>% 
-  summarise(arr_delay = mean(arr_delay, na.rm = TRUE)) %>%
- arrange(desc(arr_delay))
-
-min(data=txhousing,sales)
-
-
-  group_by(city, month, year) %>% 
-  summarise(
-    min
-    
+```{r}
+txhousing %>% filter(sales > 500) %>%
+  group_by(city) %>%
+  summarise(prop_median = mean(median, na.rm = TRUE)) %>%
+  ggplot(aes(y = prop_median, x = city)) +
+  geom_bar(stat = 'identity')+ coord_flip()
+  
 ```
-flights %>% 
-  group_by(city) %>% 
-  summarise(
-    count = n(),
-    count_dist = n_distinct(arr_delay),
-    count_non_miss = sum(!is.na(arr_delay))
-  )
 
-txhousing %>% 
-  group_by(city, month, year) %>% 
-  summarise(
-    count = n(),
-    dist = mean(distance, na.rm = TRUE),
-    delay = mean(arr_delay, na.rm = TRUE)
-  min_rank(desc(data=txhousing, sales))
+
+
+
+
+
+```{r}
+
+sales_m500 <- txhousing %>% 
+  filter(sales > 500)
+
+ggplot(data = sales_m500) + 
+  geom_point(mapping = aes(x = sales, y = median))+
+  geom_smooth(mapping = aes(x = sales, y = median)) +
+facet_wrap(~ city)
+
+
+```
+
+
+  
+###6) I think I'm over-thinking this question but this is how I would explore median sales across cities. Cities like Houston and Dallas have sales clustered greater than 2500, although the median price range is fairly small.  That is the slope of these lines are pretty flat (small). Cities like Fort Bend, Montgomery County, Denton County and the Bay Area have much steeper slopes, there's fewer sales for the median price of sales. 
+
+### Any cities that stand out that you’d want to investigate further? I'd want to investigate  Dallas and Houston further first. Then Austin, Collin County, and San Antonio as another batch. Arlington, Bay Area, Corpus Christi, Denton County, Fort Bend, El Paso, Fort Worth, Montgomery County, NE Tarrant County as another batch. They seem to break out into 3 groups with high, medium, and low amount of sales.
+
+```{r}
+sales_m500 <- txhousing %>% 
+  filter(sales > 500)
+
+  ggplot(data = sales_m500) + 
+  geom_point(mapping = aes(x = sales, y = median)) +
+facet_wrap(~ city)
+```
+
+
+###• Why might we want to filter out all cities and months with sales less than 500? When I plot all cities' sales number vs median sales price, you see a steep curve at the lower end of sales range. So let's explore the distribution sales greater than 500 and less than 500.  Now there's still a bump which makes me want to explore the relationship for sales less than 1000 and greater than 1000. These results might be related to the size of the cities. Larger cities have higher sales, smaller cities have less sales, which some of the earlier plots point to. You might also want the analysis to remove sales less than 500 to remove the smaller cities, or winter months (sales tend to be less frequent then).
+
+```{r}
+
+ggplot(data = txhousing) + 
+  geom_point(mapping = aes(x = sales, y = median)) +
+  geom_smooth(mapping = aes(x = sales, y = median))
+
+
+sales_gt500 <- txhousing %>% 
+  filter(sales >= 500)
+
+ggplot(data = sales_gt500) + 
+  geom_point(mapping = aes(x = sales, y = median)) +
+  geom_smooth(mapping = aes(x = sales, y = median))
+
+
+sales_LT500 <- txhousing %>% 
+  filter(sales < 500)
+
+ggplot(data = sales_LT500) + 
+  geom_point(mapping = aes(x = sales, y = median)) +
+  geom_smooth(mapping = aes(x = sales, y = median))
+
+
+sales_gt1000 <- txhousing %>% 
+  filter(sales >= 1000)
+
+ggplot(data = sales_gt1000) + 
+  geom_point(mapping = aes(x = sales, y = median)) +
+  geom_smooth(mapping = aes(x = sales, y = median))
+
+sales_LT1000 <- txhousing %>% 
+  filter(sales < 1000)
+
+ggplot(data = sales_LT1000) + 
+  geom_point(mapping = aes(x = sales, y = median)) +
+  geom_smooth(mapping = aes(x = sales, y = median))
+
+
+  ggplot(data = sales_gt500) + 
+  geom_point(mapping = aes(x = sales, y = median)) +
+facet_wrap(~ city)
+  
+  
+  ggplot(data = sales_LT500) + 
+  geom_point(mapping = aes(x = sales, y = median)) +
+facet_wrap(~ city)
+```
+
