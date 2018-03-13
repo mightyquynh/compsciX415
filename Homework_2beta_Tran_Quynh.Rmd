@@ -1,8 +1,8 @@
 ---
 title: "Homework_2_Quynh_Tran"
 output:
-  html_document: default
   
+  html_document: default
 ---
 
 
