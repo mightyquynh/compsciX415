@@ -102,8 +102,8 @@ ggplot(gamma_samp, aes(x = x))+
   geom_density(alpha=.2, fill="#FF6666")
 
 ```
-
-
+###Robert, I'm curious to understand what happens if there's a difference between using the ggplot () geom_histogram ()  vs. basic R hist() functions.
+ 
 ```{r}
 n<-10000
 gamma_samp <- rgamma(n,shape=1,scale=2)
@@ -225,7 +225,7 @@ mean_samp[i] <- mean(g_samp)
 mean_samp <- tibble(mean_samp)
 
 
-ggplot(mean_samp, aes(x = x))+
+ggplot(mean_samp, aes(x = mean_samp))+
   geom_histogram(binwidth=.5, colour="black", fill="white")+
   geom_density(alpha=.2, fill="#FF6666")
 
@@ -252,8 +252,8 @@ mean_samp <- tibble(mean_samp)
 
 
 mean_samp%>%
-summarize(mean_samp = mean(x, na.rm = TRUE),
-                        sd_samp= sd(x, na.rm = TRUE))
+summarize(mean_samp = mean(mean_samp, na.rm = TRUE),
+                        sd_samp= sd(mean_samp, na.rm = TRUE))
 
 ```
 
@@ -287,13 +287,13 @@ mean_samp[i] <- mean(g_samp)
 # Convert vector to a tibble
 mean_samp <- tibble(mean_samp)
 
-ggplot(mean_samp, aes(x = x))+
+ggplot(mean_samp, aes(x = mean_samp))+
   geom_histogram(binwidth=.5, colour="black", fill="white")+
   geom_density(alpha=.2, fill="#FF6666")
 
 mean_samp%>%
-summarize(mean_samp = mean(x, na.rm = TRUE),
-                        sd_samp= sd(x, na.rm = TRUE))
+summarize(mean_samp = mean(mean_samp, na.rm = TRUE),
+                        sd_samp= sd(mean_samp, na.rm = TRUE))
 
 ```
 
