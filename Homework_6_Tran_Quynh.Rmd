@@ -1,0 +1,299 @@
+---
+title: "COMPSCIX 415.2 homework 6"
+author: "Quynh Tran"
+date: "March 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+library(mosaicData)
+library(tidyverse)
+
+```
+
+## 1. Whickham dataset. 
+###1. What variables are in this data set? outcome, smoker, age
+###2. How many observations are there and what does each represent? A data frame with 1314 observations on women for the following variables: 1) outcome: survival status after 20 years (alive or dead); 2) smoker: smoking status at baseline (No or Yes); 3) age: age (in years) at the time of the first survey/.
+
+
+###3. Create a table (use the R code below as a guide) and a visualization of the relationship between smoking status and outcome, ignoring age. What do you see? Does it make sense? It does not make sense because it shows that smokers have a greater likelihood of being alive than dead.
+
+
+```{r}
+Whickham %>% count(smoker, outcome)
+
+Whickham %>% ggplot(aes(x = smoker, fill = outcome)) + 
+geom_bar(position = 'fill') +
+  scale_fill_manual(values = c('blue', 'red'))+
+labs(y = '') +
+theme_bw()
+```
+
+
+```{r}
+library(forcats)
+library (dplyr)
+Whickham %>% count(smoker, outcome)
+smokes <-tribble(
+  ~smoker, ~outcome, ~value,
+"No",	"Alive",	502,		
+"No",	"Dead",	230,		
+"Yes",	"Alive",	443,		
+"Yes",	"Dead",	139,	
+)
+smokes %>% 
+  ggplot() + geom_bar(aes(x = smoker, y = value, fill=outcome), stat = 'identity', position='dodge') +
+  scale_fill_manual(values = c('blue', 'red'))+
+  labs(x = 'smoker', y = 'outcome', 
+       title = 'Smoker status and outcome')
+
+
+```
+
+                        
+###4. Recode the age variable into an ordered factor with three categories: age <= 44, age > 44 & age <= 64, and age > 64. Now, recreate visualization from above, but facet on your new age factor. What do you see? Does it make sense? It is still surprising that smoker status doesn't have much affect on outcome of dead or alive. Age has a much stronger effect. The probability of death increased dramatically with age, regardless of smoker status.
+                        
+
+```{r}
+
+
+Whickham%>% 
+  mutate(age_cat = case_when(age <= 44 ~"Younger than 44",
+                   age > 44 & age <= 64 ~"Between 44 and 64",
+                   age > 64~"Older than 64")) %>%
+  ggplot(aes(x = smoker, fill = outcome)) + 
+geom_bar(position = 'fill') +
+  scale_fill_manual(values = c('blue', 'red'))+
+labs(y = '') +
+  facet_wrap(~age_cat)
+
+Whickham%>% 
+  mutate(age_cat = case_when(age <= 44 ~"Younger than 44",
+                   age > 44 & age <= 64 ~"Between 44 and 64",
+                   age > 64~"Older than 64"), age_cat= fct_relevel(age_cat,"Younger than 44", "Between 44 and 64","Older than 64" )) %>%
+  ggplot(aes(x = smoker, fill = outcome)) + 
+geom_bar(position = 'fill') +
+  scale_fill_manual(values = c('blue', 'red'))+
+labs(y = '') +
+  facet_wrap(~age_cat)
+
+```
+
+
+ 
+#Exercise 2
+##The Central Limit Theorem states that the sampling distribution of sample means is approximately Normal, regardless of the distribution of your population. For this exercise our population distribution will be a Gamma(1,2) distribution, and we’ll show that the sampling distribution of the mean is in fact normally distributed.
+
+###1. Generate a random sample of size n = 10000 from a gamma(1,2) distribution and plot a histogram or density curve. Use the code below to help you get your sample.
+
+```{r}
+
+n<-10000
+gamma_samp <- tibble(x=rgamma(n,shape=1,scale=2))
+
+ggplot(gamma_samp, aes(x = x))+
+  geom_histogram(binwidth=.5, colour="black", fill="white")+
+  geom_density(alpha=.2, fill="#FF6666")
+
+```
+
+
+```{r}
+n<-10000
+gamma_samp <- rgamma(n,shape=1,scale=2)
+
+hist(gamma_samp,prob=T,main='Gamma,scale=2')
+lines(density(gamma_samp),col='red')
+```
+  
+###2. What is the mean and standard deviation of your sample? They should both be close to 2 because for a gamma distribution: mean = shape x scale, variance = shape x scale
+  
+```{r}
+library(tidyverse) 
+
+n <-10000
+gamma_samp <- tibble(x = rgamma(n, shape = 1, scale = 2))
+  mean_samp <- gamma_samp %>% .[['x']] %>% mean()
+  std_samp <- gamma_samp %>% .[['x']] %>% sd()
+  mean_samp
+  std_samp
+```
+  
+
+```{r}
+library(mosaicData)
+
+library(tidyverse) 
+
+n <-10000
+gamma_samp <- tibble(x = rgamma(n, shape = 1, scale = 2)) %>%
+  
+summarize(mean_random = mean(x, na.rm = TRUE),
+                        sd_random= sd(x, na.rm = TRUE))
+
+gamma_samp
+```
+
+###3. Pretend the distribution of our population of data looks like the plot above. Now take a sample of size n = 30 from a Gamma(1,2) distribution, plot the histogram or density curve, and calculate the mean and standard deviation.
+
+```{r}
+n<-30
+gamma_samp <- tibble(x=rgamma(n,shape=1,scale=2))
+
+ggplot(gamma_samp, aes(x = x))+
+  geom_histogram(binwidth=.5, colour="black", fill="white")+
+  geom_density(alpha=.2, fill="#FF6666")
+```
+```{r}
+n<-30
+gamma_samp <- tibble(x=rgamma(n,shape=1,scale=2))
+  mean_samp <-gamma_samp %>%.[['x']]%>% mean()
+   std_samp <-gamma_samp %>%.[['x']]%>% sd()
+  mean_samp
+  
+  std_samp
+```
+##Robert, please tell me how this coding makes the results different from the previous coding you suggested? Using summarize () instead of 'mean_samp <-gamma_samp %>%.[['x']]%>% mean()'
+
+```{r}
+n30 <-30
+gamma_samp <- tibble(x = rgamma(n30, shape = 1, scale = 2)) %>%
+  
+summarize(mean_random = mean(x, na.rm = TRUE),
+                        sd_random= sd(x, na.rm = TRUE))
+
+gamma_samp
+
+
+
+n30 <-30
+gamma_samp <- rgamma(n30,shape=1,scale=2)
+mean(gamma_samp)
+
+hist(gamma_samp,prob=T,main='Gamma,scale=2')
+lines(density(gamma_samp),col='red')
+
+```
+
+
+
+###4. Take a sample of size n = 30, again from the Gamma(1,2) distribution, calculate the mean, and assign it to a vector named mean_samp. Repeat this 10000 times!!!! The code below might help.
+
+```{r}
+
+n<-30
+gamma_samp <- tibble(x=rgamma(n,shape=1,scale=2))
+
+# create a vector with 10000 NAs
+mean_samp <- rep(NA, 10000)
+# start a loop 
+for(i in 1:10000) {
+g_samp <- rgamma(30, shape = 1, scale = 2)
+mean_samp[i] <- mean(g_samp)
+}
+
+# Convert vector to a tibble
+mean_samp <- tibble(mean_samp)
+
+
+
+```
+
+
+5. Make a histogram of your collection of means from above (mean_samp).
+
+```{r}
+
+n<-30
+gamma_samp <- tibble(x=rgamma(n,shape=1,scale=2))
+
+# create a vector with 10000 NAs
+mean_samp <- rep(NA, 10000)
+# start a loop 
+for(i in 1:10000) {
+g_samp <- rgamma(30, shape = 1, scale = 2)
+mean_samp[i] <- mean(g_samp)
+}
+
+# Convert vector to a tibble
+mean_samp <- tibble(mean_samp)
+
+
+ggplot(mean_samp, aes(x = x))+
+  geom_histogram(binwidth=.5, colour="black", fill="white")+
+  geom_density(alpha=.2, fill="#FF6666")
+
+```
+
+
+##6. Calculate the mean and standard deviation of all of your sample means.
+
+```{r}
+
+n <-30
+gamma_samp <- tibble(x=rgamma(n,shape=1,scale=2))
+
+# create a vector with 10000 NAs
+mean_samp <- rep(NA, 10000)
+# start a loop 
+for(i in 1:10000) {
+g_samp <- rgamma(30, shape = 1, scale = 2)
+mean_samp[i] <- mean(g_samp)
+}
+
+# Convert vector to a tibble
+mean_samp <- tibble(mean_samp)
+
+
+mean_samp%>%
+summarize(mean_samp = mean(x, na.rm = TRUE),
+                        sd_samp= sd(x, na.rm = TRUE))
+
+```
+
+
+  mean_samp <-mean_samp %>%.[['x']]%>% mean()
+   std_samp <-mean_samp %>%.[['x']]%>% sd()
+  mean_samp
+  std_samp
+
+
+
+###7. Did anything surprise you about your answers to #6? The larger the sample, the more accurate the sample means and std to the true population mean and std. When your sample size is only 30, your mean and std is not very accurate. However with repeated samples of size 30, the collection of sample mean and std, even though small, should approximate to the true population mean and std. 
+
+
+
+###8. According to the Central Limit Theorem, the mean of your sampling distribution should be very close to 2, and the standard deviation of your sampling distribution should be close to σ = 2 = 0.365. n 30. Repeat #4-#6, but now with a sample of size n = 300 instead. Do your results match up well with the theorem?  Yes. 
+
+```{r}
+
+n<-300
+gamma_samp <- tibble(x=rgamma(n,shape=1,scale=2))
+
+# create a vector with 10000 NAs
+mean_samp <- rep(NA, 10000)
+# start a loop 
+for(i in 1:10000) {
+g_samp <- rgamma(300, shape = 1, scale = 2)
+mean_samp[i] <- mean(g_samp)
+}
+
+# Convert vector to a tibble
+mean_samp <- tibble(mean_samp)
+
+ggplot(mean_samp, aes(x = x))+
+  geom_histogram(binwidth=.5, colour="black", fill="white")+
+  geom_density(alpha=.2, fill="#FF6666")
+
+mean_samp%>%
+summarize(mean_samp = mean(x, na.rm = TRUE),
+                        sd_samp= sd(x, na.rm = TRUE))
+
+```
+
