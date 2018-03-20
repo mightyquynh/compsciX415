@@ -1,0 +1,290 @@
+---
+title: "Homework 7"
+author: "Quynh Tran"
+date: "March 20, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+###Exercise 1
+
+Train.csv dataset has 24 variables and 1460 observations.
+
+
+###Exercise 2
+
+```{r}
+library(tidyverse) 
+library(broom)
+
+
+file_path <- '~/compscix-415-2-assignments/train.csv'
+train <- read_csv(file = file_path)
+
+set.seed(29283) 
+
+# When taking a random sample, it is often useful to set a seed so that your work is reproducible. Setting a seed will guarantee that the same random sample will be generated every time, so long as you always set the # same seed beforehand.
+
+train_set <- train %>% sample_frac(.70) # Let's create our training set using sample_frac. Fill in the blank. 
+
+
+```
+
+
+
+```{r}
+test_set <- train %>% filter(!(train$Id %in% train_set$Id)) 
+#This data already has an Id column which we can make use of. let's create our testing set using the Id column. Fill in the blanks.
+```
+###Exercise 3
+
+Our target is called SalePrice. First, we can fit a simple regression model consisting of only the intercept (the average of SalePrice). Fit the model and then use the broom package to
+• take a look at the coefficient,
+• compare the coefficient to the average value of SalePrice, and take a look at the R-squared.
+
+####The y-intercept is $182,176, which is the same as the mean SalePrice. The R-square is 0.
+
+```{r}
+
+# Fit a model with intercept only
+(mod_0 <- lm(SalePrice ~ 1, data =train_set))
+
+```
+```{r}
+# Double-check that the average SalePrice is equal to our model's coefficient
+mean(train_set$SalePrice) 
+```
+
+```{r}
+tidy(mod_0)
+glance(mod_0)
+```
+
+###Exercise 4
+
+Now fit a linear regression model using GrLivArea, OverallQual, and Neighborhood as the features. Don’t forget to look at data_description.txt to understand what these variables mean. Ask yourself these questions before fitting the model:
+ 
+What kind of relationship will these features have with our target? Can the relationship be estimated linearly? 
+
+####GrLivArea is the living area square feet; OverallQual is a rating 1-10 of the material/finish of the house; Neighborhood is a categorical variable naming physical locations in Ames, Iowa. I expect positive relationship between the living area square footage and overall quality with the sales price of the home. I do not know anything about the neighborhood characteristics so cannot make a prediction.
+
+```{r}
+(model_LivArea <- lm(formula=SalePrice ~ GrLivArea, data =train_set))
+tidy (model_LivArea)
+glance (model_LivArea)
+
+```
+
+```{r}
+(model_OverQual <- lm(formula=SalePrice ~ OverallQual, data =train_set))
+tidy (model_OverQual)
+glance (model_OverQual)
+```
+```{r}
+(model_Neighb <- lm(formula=SalePrice ~ Neighborhood, data =train_set))
+tidy (model_Neighb)
+glance(model_Neighb)
+```
+
+```{r}
+train_set <- train_set %>% mutate(neigh_fct = factor(Neighborhood, ordered = FALSE))
+(model_Neighb <- lm(formula=SalePrice ~ neigh_fct, data =train_set))
+```
+```{r}
+(multmodel_1 <- lm(formula=SalePrice ~ GrLivArea + OverallQual + Neighborhood, data =train_set))
+tidy(multmodel_1)
+glance(multmodel_1)
+```
+
+```{r}
+(multmodel_2 <- lm(formula=SalePrice ~ GrLivArea + OverallQual + neigh_fct, data =train_set))
+tidy(multmodel_2)
+glance(multmodel_2)
+```
+
+
+Are these good features, given the problem we are trying to solve? After fitting the model, output the coefficients and the R-squared using the broom package. Answer these questions:
+How would you interpret the coefficients on GrLivArea and OverallQual? 
+
+Coefficients:
+(Intercept)    GrLivArea  
+     7518.6        115.8
+     
+     
+####For every one square foot GrLivArea increase, SalesPrice on average increases by 115.80 dollars Theoretically if house has 0 square feet, it would cost $7518.60.
+
+(Intercept)  OverallQual  
+    -105873        47192 
+    
+    
+####For every one unit increase in OverallQual (ranging from 1-10), there is an increase on average by $47,192. Theoretically if the house has a zero rating on OverallQual, it would cost -105,873.
+
+Coefficients:
+        (Intercept)            GrLivArea          OverallQual  NeighborhoodBlueste  
+          -45017.87                62.78             21692.23            -38288.88  
+ NeighborhoodBrDale  NeighborhoodBrkSide  NeighborhoodClearCr  NeighborhoodCollgCr  
+          -43314.05            -14064.37             27839.01              4297.67  
+NeighborhoodCrawfor  NeighborhoodEdwards  NeighborhoodGilbert   NeighborhoodIDOTRR  
+            7423.06            -15284.11             -8357.56            -32689.43  
+NeighborhoodMeadowV  NeighborhoodMitchel    NeighborhoodNAmes  NeighborhoodNoRidge  
+          -14446.07              1922.31             -7719.68             47685.17  
+NeighborhoodNPkVill  NeighborhoodNridgHt   NeighborhoodNWAmes  NeighborhoodOldTown  
+          -20240.71             63872.81            -12279.33            -36107.08  
+ NeighborhoodSawyer  NeighborhoodSawyerW  NeighborhoodSomerst  NeighborhoodStoneBr  
+           -4121.93             -5391.97             18700.97             65712.46  
+  NeighborhoodSWISU   NeighborhoodTimber  NeighborhoodVeenker  
+          -45451.87             27925.09             54913.13  
+
+####In the multivariate model, for every one square foot increase in GrLivArea and one level increase in OverallQual, the price increases by $62.77 and 21,692 dollars, on average. 
+    
+• How would you interpret the coefficient on NeighborhoodBrkSide?
+Coefficients:
+     (Intercept)  neigh_fctBlueste   neigh_fctBrDale  neigh_fctBrkSide  neigh_fctClearCr  
+          200308            -76308            -92908            -76713             19854  
+neigh_fctCollgCr  neigh_fctCrawfor  neigh_fctEdwards  neigh_fctGilbert   neigh_fctIDOTRR  
+           -4492              4905            -69405             -9248            -94072  
+neigh_fctMeadowV  neigh_fctMitchel    neigh_fctNAmes  neigh_fctNoRidge  neigh_fctNPkVill  
+         -103085            -44658            -54161            135254            -59058  
+neigh_fctNridgHt   neigh_fctNWAmes  neigh_fctOldTown   neigh_fctSawyer  neigh_fctSawyerW  
+          118035            -12272            -72381            -63193            -20426  
+neigh_fctSomerst  neigh_fctStoneBr    neigh_fctSWISU   neigh_fctTimber  neigh_fctVeenker  
+           34566            118544            -52975             52346             63620  
+          
+####The neighborhoods with positive coefficients (compared to BloomingtonHeights) are: ClearCr, Crawfor, NoRidge, NridgHt, Somerst, StoneBr, Timber, Veenker. NeighborhoodNoRidge has the strongest effect, with an average increase	of $135,254.14 for homes in this neigborhood compared to BloomingtonHeights.
+
+####The neighborhoods with negative coefficients are: Blueste, BrDale, BrkSide, CollgCr, Edwards, Gilbert, IDOTRR, MeadowV, Mitchel, NAmes, NPkVill, NWAmes, OldTown, Sawyer, SawyerW, SWISU. Neighborhood MeadowV has the strongest negative effect, with an average decrease of $103,085 for homes in this neighborhood compared to BloomingtonHeights.  
+
+####If neighborhoods are the only predictor of SalePrice, Neighborhood BrkSide has a negative effect of $76,713 on average for homes compared to BloomingtonHeights.
+
+####In the multivariate model, Neighborhood BrkSide has a negative effect of $14,064.37 on average for homes compared to BloomingtonHeights.
+
+• Are the features significant?
+
+####All the features are significant. They are strong predictors of SalesPrice.
+
+• Are the features practically significant? 
+
+####All the features are practically significant. 
+
+• Is the model a good fit (to the training set)?  
+
+####Yes. The r-squared is the proportion of variability in Y explained by the model. Its p-value for the linear regression model as well as multi-variate regression model shows that the models are a good fit. All their p-values are less than 0.05.
+
+
+
+
+###Exercise 5
+Evaluate the model on test_set using the root mean squared error (RMSE). Use the predict function to get the model predictions for the testing set. 
+ Hint: use the sqrt() and mean() functions:
+ 
+```{r}
+
+
+test_predictions <- predict(multmodel_1, newdata = test_set)
+
+rmse <- sqrt(mean((test_set$SalePrice-test_predictions)^2))
+rmse
+```
+
+ 
+###Exercise 6 (OPTIONAL - won’t be graded)
+Feel free to play around with linear regression. Add some other features and see how the model results change. Test the model on test_set to compare the RMSE’s.
+
+```{r}
+(Sales_model <- lm(formula=SalePrice ~ GrLivArea + OverallQual + OverallCond+ LotArea+ Neighborhood + BldgType + Condition1, data =train_set))
+tidy(Sales_model)
+glance(Sales_model)
+```
+
+
+###Exercise 7
+One downside of the linear model is that it is sensitive to unusual values because the distance incorporates a squared term. Fit a linear model to the simulated data below, and visualise the results. Rerun a few times to generate different simulated datasets. What do you notice about the model?
+
+####This model has a random generation function on the length of X, rt(length(x)), a constant of 6, and a coefficient of 1.5 for X.  Basically, it's a linear regression model of y=1.5x + 6 + random. The random function has a big effect on the model. In just these 5 runs, my Y-intercept ranged from 5.74 to 7.32. 
+
+
+```{r}
+sim1a <- tibble(
+x = rep(1:10, each = 3),
+y = x * 1.5 + 6 + rt(length(x), df = 2))
+
+uni_mod1 <- lm(y~x, data=sim1a)
+tidy(uni_mod1)
+glance(uni_mod1)
+
+ggplot (data=sim1a, aes(x=x, y=y)) +
+  geom_point() + geom_smooth() 
+```
+```{r}
+sim2a <- tibble(
+x = rep(1:10, each = 3),
+y = x * 1.5 + 6 + rt(length(x), df = 2))
+
+uni_mod2 <- lm(y~x, data=sim2a)
+tidy(uni_mod2)
+glance(uni_mod2)
+
+ggplot (data=sim2a, aes(x=x, y=y)) +
+  geom_point()+ geom_smooth() 
+```
+
+```{r}
+sim3a <- tibble(
+x = rep(1:10, each = 3),
+y = x * 1.5 + 6 + rt(length(x), df = 2))
+
+
+uni_mod3 <- lm(y~x, data=sim3a)
+tidy(uni_mod3)
+glance(uni_mod3)
+
+ggplot (data=sim3a, aes(x=x, y=y)) +
+  geom_point()+ geom_smooth() 
+```
+
+```{r}
+sim4a <- tibble(
+x = rep(1:10, each = 3),
+y = x * 1.5 + 6 + rt(length(x), df = 2))
+
+uni_mod4 <- lm(y~x, data=sim4a)
+tidy(uni_mod1)
+glance(uni_mod1)
+
+ggplot (data=sim4a, aes(x=x, y=y)) +
+  geom_point()+ geom_smooth() 
+```
+
+```{r}
+sim5a <- tibble(
+x = rep(1:10, each = 3),
+y = x * 1.5 + 6 + rt(length(x), df = 2))
+
+
+uni_mod5 <- lm(y~x, data=sim5a)
+tidy(uni_mod5)
+glance(uni_mod5)
+
+ggplot (data=sim5a, aes(x=x, y=y)) +
+  geom_point()+ geom_smooth() 
+
+```
+
+
+ggplot(aes(x=x,y=y))+
+  geom_point(data = sim1a, color = 'red') + 
+  geom_point(data = sim2a, color = 'orange') +
+  geom_point(data = sim3a, color = 'yellow') +
+  geom_point(data = sim4a, color = 'green') +
+  geom_point(data = sim5a, color = 'blue') 
+
+ 
+
+
+
+
+
