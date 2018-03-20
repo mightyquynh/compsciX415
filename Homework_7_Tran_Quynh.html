@@ -601,8 +601,8 @@ rmse</code></pre>
 <div id="exercise-7" class="section level3">
 <h3>Exercise 7</h3>
 <p>One downside of the linear model is that it is sensitive to unusual values because the distance incorporates a squared term. Fit a linear model to the simulated data below, and visualise the results. Rerun a few times to generate different simulated datasets. What do you notice about the model?</p>
-<div id="this-model-has-a-random-generation-function-on-the-length-of-x-rtlengthx-a-constant-of-6-and-a-coefficient-of-1.5-for-x.-basically-its-a-linear-regression-model-of-y1.5x-6-random.-the-random-function-has-a-big-effect-on-the-model.-in-just-these-5-runs-my-y-intercept-ranged-from-5.74-to-7.32." class="section level4">
-<h4>This model has a random generation function on the length of X, rt(length(x)), a constant of 6, and a coefficient of 1.5 for X. Basically, it’s a linear regression model of y=1.5x + 6 + random. The random function has a big effect on the model. In just these 5 runs, my Y-intercept ranged from 5.74 to 7.32.</h4>
+<div id="this-model-has-a-random-generation-function-on-the-length-of-x-rtlengthx-a-constant-of-6-and-a-coefficient-of-1.5-for-x.-basically-its-a-linear-regression-model-of-y1.5x-6-random.-the-random-function-has-a-big-effect-on-the-model.-in-just-these-5-runs-my-y-intercept-ranged-from-5.74-to-7.32-which-can-be-mostly-explained-by-the-constant-6.-but-the-coefficient-of-x-also-varied-ranging-from-1.37-to-1.53." class="section level4">
+<h4>This model has a random generation function on the length of X, rt(length(x)), a constant of 6, and a coefficient of 1.5 for X. Basically, it’s a linear regression model of y=1.5x + 6 + random. The random function has a big effect on the model. In just these 5 runs, my Y-intercept ranged from 5.74 to 7.32, which can be mostly explained by the constant 6. But the coefficient of X also varied, ranging from 1.37 to 1.53.</h4>
 <pre class="r"><code>sim1a &lt;- tibble(
 x = rep(1:10, each = 3),
 y = x * 1.5 + 6 + rt(length(x), df = 2))

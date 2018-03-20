@@ -204,7 +204,7 @@ glance(Sales_model)
 ###Exercise 7
 One downside of the linear model is that it is sensitive to unusual values because the distance incorporates a squared term. Fit a linear model to the simulated data below, and visualise the results. Rerun a few times to generate different simulated datasets. What do you notice about the model?
 
-####This model has a random generation function on the length of X, rt(length(x)), a constant of 6, and a coefficient of 1.5 for X.  Basically, it's a linear regression model of y=1.5x + 6 + random. The random function has a big effect on the model. In just these 5 runs, my Y-intercept ranged from 5.74 to 7.32. 
+####This model has a random generation function on the length of X, rt(length(x)), a constant of 6, and a coefficient of 1.5 for X.  Basically, it's a linear regression model of y=1.5x + 6 + random. The random function has a big effect on the model. In just these 5 runs, my Y-intercept ranged from 5.74 to 7.32, which can be mostly explained by the constant 6. But the coefficient of X also varied, ranging from 1.37 to 1.53.
 
 
 ```{r}
