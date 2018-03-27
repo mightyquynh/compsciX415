@@ -1,5 +1,5 @@
 ---
-title: "Homework_8"
+title: "Homework 8"
 author: "Quynh Tran"
 date: "March 20, 2018"
 output: html_document
@@ -7,16 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-```
-
-
-```{r}
-
-install.packages('broom')
-install.packages('rpart')
-install.packages('partykit')
-install.packages('ROCR')
-
 ```
 
 ```{r}
@@ -31,7 +21,7 @@ library (broom)
 
 
 ###Exercise 1
-Load the train.csv dataset into R. How many observations and columns are there? 891 observations, 12 variables.
+####Load the train.csv dataset into R. How many observations and columns are there? 891 observations, 12 variables.
 
 ```{r}
 
@@ -68,19 +58,20 @@ Our target is called Survived. First, fit a logistic regression model using Pcla
 Ask yourself these questions before fitting the model:
 • What kind of relationship will these features have with the probability of survival?
 • Are these good features, given the problem we are trying to solve?
-Survived is whether the person survived the Titanic sinking (0,1); Pclass is the class of passage (1,2,3) which approximates social class and ability to pay for a higher fare; Sex is male/female; and Fare is a numeric value. Fare and Pclass would be highly correlated features. The higher the fare, the more likely it would be a first class ticket. Both would be related to survival. First class passengers' rooms are on the upper level and during the sinking of the Titanic, it would have been easier for them to escape. Lower class passengers' rooms are in the lower decks and harder to exit to survive. Also during the evacuation, they would evacuate first class passengers before anyone else. 
 
-Sex is a good feature. They would likely evacuate women before men, although men would be more fit to survive once evacuated. Age would be a good feature.
+####Survived is whether the person survived the Titanic sinking (0,1); Pclass is the class of passage (1,2,3) which approximates social class and ability to pay for a higher fare; Sex is male/female; and Fare is a numeric value. Fare and Pclass would be highly correlated features. The higher the fare, the more likely it would be a first class ticket. Both would be related to survival. First class passengers' rooms are on the upper level and during the sinking of the Titanic, it would have been easier for them to escape. Lower class passengers' rooms are in the lower decks and harder to exit to survive. Also during the evacuation, they would evacuate first class passengers before anyone else. 
+
+####Sex is a good feature. They would likely evacuate women before men, although men would be more fit to survive once evacuated. Age would be a good feature.
 
 
 After fitting the model, output the coefficients using the broom package and answer these questions:
 • How would you interpret the coefficients? • Are the features significant?
 
-All the features in the model are significant. Sex has the strongest effect, being male decreases the log-odds of survival, 2.8 times more likely to die than if the passenger were female.
+####All the features in the model are significant. Sex has the strongest effect, being male decreases the log-odds of survival, 2.8 times more likely to die than if the passenger were female.
 
-Passenger class also have an effect. The higher the class, the more likely the passenger would die, that is first class passenger are least likely to die whereas 3rd class passnger have the highest probability of death. The log odds of 0.87 times more likely to die as Pclass increases from 1st to 3rd class. 
+####Passenger class also have an effect. The higher the class, the more likely the passenger would die, that is first class passenger are least likely to die whereas 3rd class passnger have the highest probability of death. The log odds of 0.87 times more likely to die as Pclass increases from 1st to 3rd class. 
 
-While Fare is statistically significant, the higher the fare, the more likely the person survived, but the coefficient is very small (0.0018) and therefore its effect is small. I would not use this in the model. I expect it's highly correlated with Pclass and most of the effect on survival can be explained by Pclass already. 
+####While Fare is statistically significant, the higher the fare, the more likely the person survived, but the coefficient is very small (0.0018) and therefore its effect is small. I would not use this in the model. I expect it's highly correlated with Pclass and most of the effect on survival can be explained by Pclass already. 
 
 
 ```{r}
@@ -95,8 +86,12 @@ tidy(survival)
 Now, let’s fit a model using a classification tree, using the same features and plot the final decision tree. Use the code below for help.
 Answer these questions:
 • Describe in words one path a Titanic passenger might take down the tree. (Hint: look at your tree, choose a path from the top to a terminal node, and describe the path like this - a male passenger who paid a fare > 30 and was in first class has a high probability of survival)
-A female passenger in 1st or 2nd class has the highest probability of survival. A female in 3rd class whose fare is between $7.88 and $15 has the second best probability of survival. A female passenger in 3rd class who paid less than $7.88 has the third best probability of survival.
+
+####A female passenger in 1st or 2nd class has the highest probability of survival. A female in 3rd class whose fare is between $7.88 and $15 has the second best probability of survival. A female passenger in 3rd class who paid less than $7.88 has the third best probability of survival.
+
 • Does anything surprise you about the fitted tree?
+
+####I was surprised how strong sex was a factor in survival. 
 
 ```{r}
 
@@ -160,41 +155,63 @@ auc_tree@y.values[[1]]
 
 What do you notice about the ROC curves and the AUC values? Are the models performing well? Is the logistic regression model doing better, worse, or about the same as the classification tree?
 
-Visually it's a harder the differentiate the ROC curves of the logistic regression and classification tree model. The logistic curve is fatter and has a rounder curve whereas the tree model curve has a flatter curve.
+####Visually it's a harder the differentiate the ROC curves of the logistic regression and classification tree model. The logistic curve is fatter and has a rounder curve whereas the tree model curve has a flatter curve.
 
-The area under the curve (AUC) of the logistic regression model is closer to 1, at 0.81 than the AUC of the classification model, at 0.77. The AUC values show that the logistic regression model is better.
+####The area under the curve (AUC) of the logistic regression model is closer to 1, at 0.81 than the AUC of the classification model, at 0.77. The AUC values show that the logistic regression model is better.
 
 
 (c) Lastly, pick a probability cutoff by looking at the ROC curves. You pick, there’s no right answer (but there is a wrong answer - make sure to pick something between 0 and 1). 
 
 Using that probability cutoff, create the confusion matrix for each model by following these steps:
+
 1. Pick a cutoff value.
+
 2. Append the predicted probability values from each model (you created these at the beginning of
 Exercise 5) to your test_set tibble using mutate().
 
 3. Create a new column for the predicted class from each model using mutate() and case_when(). Your new predicted class columns can have two possible values: yes or no which represents whether or not the passenger is predicted to have survived or not given the predicted probability.
+
 4. You should now have 4 extra columns added to your test_set tibble, two columns of predicted probabilities, and two columns of the predicted categories based on your probability cutoff.
 5. Now create the table using the code below:
 
+titanic30 %>% count(_____, Survived) %>% spread(Survived, n) 
+titanic30 %>% count(_____, Survived) %>% spread(Survived, n)
+
 ```{r}
-test_set %>% count(_____, Survived) %>% spread(Survived, n) 
-test_set %>% count(_____, Survived) %>% spread(Survived, n)
+
+test_logit <- predict(survival, newdata = titanic30, type = 'response') 
+head (test_logit)
+
+titanic30 <- titanic30 %>% mutate(preds_prob = test_logit) %>% 
+  mutate(preds_cat = case_when(preds_prob < .25 ~ 'No',
+                               preds_prob >= .25 ~ 'Yes'))
+
+titanic30 %>% count(preds_cat)
+
+titanic30 %>% count(preds_cat, Survived) %>% spread(Survived, n)
+
+```
+
+```{r}
+
+test_tree <- predict(tree_mod, newdata = titanic30)
+head(test_tree)
+
+titanic30 <- titanic30 %>% mutate(preds_prob_tree = test_tree[, 2]) %>% 
+  mutate(preds_cat_tree = case_when(preds_prob_tree < .25 ~ 'No',
+                               preds_prob_tree >= .25 ~ 'Yes'))
+
+titanic30 %>% count(preds_cat_tree)
+
+titanic30 %>% count(preds_cat_tree, Survived) %>% spread(Survived, n)
 ```
 
 If you choose a cutoff of 0.25, your confusion tables should look like this:
-## Logistic model:
-## # A tibble: 2 x 3
-##   class_logit   `0`   `1`
-## * <chr>       <int> <int>
-## 1 No            112    21
-## 2 Yes            50    84
-## Classification tree model:
-## # A tibble: 2 x 3
- t
-##   class_tree
-## * <chr>
-## 1 No           120    22
-## 2 Yes           42    83
+
+   class_tree
+ * <chr>
+ 1 No           120    22
+ 2 Yes           42    83
 
 
 Exercise 6 (OPTIONAL - won’t be graded)
