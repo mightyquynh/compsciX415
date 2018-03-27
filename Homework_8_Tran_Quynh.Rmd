@@ -59,9 +59,9 @@ Ask yourself these questions before fitting the model:
 • What kind of relationship will these features have with the probability of survival?
 • Are these good features, given the problem we are trying to solve?
 
-####Survived is whether the person survived the Titanic sinking (0,1); Pclass is the class of passage (1,2,3) which approximates social class and ability to pay for a higher fare; Sex is male/female; and Fare is a numeric value. Fare and Pclass would be highly correlated features. The higher the fare, the more likely it would be a first class ticket. Both would be related to survival. First class passengers' rooms are on the upper level and during the sinking of the Titanic, it would have been easier for them to escape. Lower class passengers' rooms are in the lower decks and harder to exit to survive. Also during the evacuation, they would evacuate first class passengers before anyone else. 
+####Survived is whether the person survived the Titanic sinking (0=died/no,1=survived/yes); Pclass is the class of passage (1,2,3) which approximates social class and ability to pay for a higher fare; Sex is male/female; and Fare is a numeric value. Fare and Pclass would be highly correlated features. The higher the fare, the more likely it would be a first class ticket. Both would be related to survival. First class passengers' rooms are on the upper level and during the sinking of the Titanic, it would have been easier for them to escape. Lower class passengers' rooms are in the lower decks and harder to exit to survive. Also during the evacuation, they would evacuate first class passengers before anyone else. 
 
-####Sex is a good feature. They would likely evacuate women before men, although men would be more fit to survive once evacuated. Age would be a good feature.
+####Sex is a good feature. They would likely evacuate women before men, although men would be more fit to survive once evacuated. Age would be a good feature to consider. Younger passengers should be fitter for survival, although they probably evacuate older passengers and children first.
 
 
 After fitting the model, output the coefficients using the broom package and answer these questions:
@@ -214,7 +214,25 @@ If you choose a cutoff of 0.25, your confusion tables should look like this:
  2 Yes           42    83
 
 
-Exercise 6 (OPTIONAL - won’t be graded)
+###Exercise 6 (OPTIONAL - won’t be graded)
 Feel free to play around with logistic regression and classification trees. Add some other features and see how the model results change. Test the model on test_set to compare the ROC curves. Bonus points (still won’t be graded) for plotting all ROC curves on the same plot.
 
+
+```{r}
+survival2 <- glm(Survived ~ Pclass + Sex + Age, data = titanic70, family = 'binomial')
+# take a look at the features and coefficients
+tidy(survival2)
+
+survival3 <- glm(Survived ~ Pclass + Sex + Fare + Age, data = titanic70, family = 'binomial')
+# take a look at the features and coefficients
+tidy(survival3)
+```
+
+```{r}
+tree_mod2 <- rpart(Survived_fac ~ Pclass + Sex + Fare, data = titanic70) 
+plot(as.party(tree_mod2))
+
+tree_mod3 <- rpart(Survived_fac ~ Pclass + Sex + Fare+ Age, data = titanic70) 
+plot(as.party(tree_mod3))
+```
 
