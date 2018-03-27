@@ -210,8 +210,8 @@ If you choose a cutoff of 0.25, your confusion tables should look like this:
 
    class_tree
  * <chr>
- 1 No           120    22
- 2 Yes           42    83
+ 1 No           138    37
+ 2 Yes           24    68
 
 
 ###Exercise 6 (OPTIONAL - won’t be graded)
